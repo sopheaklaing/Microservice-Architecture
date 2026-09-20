@@ -1,0 +1,346 @@
+
+services:
+
+  # ==================================================
+  # AUTH SERVICE
+  # ==================================================
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: auth-postgres
+      AUTH_DB_NAME: ${AUTH_DB_NAME}
+      AUTH_DB_USERNAME: ${AUTH_DB_USERNAME}
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      auth-postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # USER SERVICE
+  # ==================================================
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: user-postgres
+      USER_DB_NAME: ${USER_DB_NAME}
+      USER_DB_USERNAME: ${USER_DB_USERNAME}
+      USER_DB_PASSWORD: ${USER_DB_PASSWORD}
+    depends_on:
+      user-postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # PROJECT SERVICE
+  # ==================================================
+
+  project-service:
+    build:
+      context: ./project-service
+      dockerfile: Dockerfile
+    container_name: project-service
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: project-postgres
+      PROJECT_DB_NAME: ${PROJECT_DB_NAME}
+      PROJECT_DB_USERNAME: ${PROJECT_DB_USERNAME}
+      PROJECT_DB_PASSWORD: ${PROJECT_DB_PASSWORD}
+    depends_on:
+      project-postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # TASK SERVICE
+  # ==================================================
+
+  task-service:
+    build:
+      context: ./task-service
+      dockerfile: Dockerfile
+    container_name: task-service
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: task-postgres
+      TASK_DB_NAME: ${TASK_DB_NAME}
+      TASK_DB_USERNAME: ${TASK_DB_USERNAME}
+      TASK_DB_PASSWORD: ${TASK_DB_PASSWORD}
+    depends_on:
+      task-postgres:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # NOTIFICATION SERVICE
+  # ==================================================
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: notification-postgres
+      NOTIFICATION_DB_NAME: ${NOTIFICATION_DB_NAME}
+      NOTIFICATION_DB_USERNAME: ${NOTIFICATION_DB_USERNAME}
+      NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      notification-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # AUTH POSTGRES
+  # ==================================================
+
+  auth-postgres:
+    image: postgres:17
+    container_name: auth-postgres
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USERNAME}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - auth-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${AUTH_DB_USERNAME} -d ${AUTH_DB_NAME}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # USER POSTGRES
+  # ==================================================
+
+  user-postgres:
+    image: postgres:17
+    container_name: user-postgres
+    environment:
+      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: ${USER_DB_USERNAME}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+    volumes:
+      - user-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${USER_DB_USERNAME} -d ${USER_DB_NAME}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # PROJECT POSTGRES
+  # ==================================================
+
+  project-postgres:
+    image: postgres:17
+    container_name: project-postgres
+    environment:
+      POSTGRES_DB: ${PROJECT_DB_NAME}
+      POSTGRES_USER: ${PROJECT_DB_USERNAME}
+      POSTGRES_PASSWORD: ${PROJECT_DB_PASSWORD}
+    volumes:
+      - project-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${PROJECT_DB_USERNAME} -d ${PROJECT_DB_NAME}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # TASK POSTGRES
+  # ==================================================
+
+  task-postgres:
+    image: postgres:17
+    container_name: task-postgres
+    environment:
+      POSTGRES_DB: ${TASK_DB_NAME}
+      POSTGRES_USER: ${TASK_DB_USERNAME}
+      POSTGRES_PASSWORD: ${TASK_DB_PASSWORD}
+    volumes:
+      - task-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${TASK_DB_USERNAME} -d ${TASK_DB_NAME}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # NOTIFICATION POSTGRES
+  # ==================================================
+
+  notification-postgres:
+    image: postgres:17
+    container_name: notification-postgres
+    environment:
+      POSTGRES_DB: ${NOTIFICATION_DB_NAME}
+      POSTGRES_USER: ${NOTIFICATION_DB_USERNAME}
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+    volumes:
+      - notification-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${NOTIFICATION_DB_USERNAME} -d ${NOTIFICATION_DB_NAME}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # REDIS
+  # ==================================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: microservices-redis
+    command:
+      [
+        "redis-server",
+        "--requirepass",
+        "${REDIS_PASSWORD}",
+        "--appendonly",
+        "yes"
+      ]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-a",
+          "${REDIS_PASSWORD}",
+          "ping"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+  # ==================================================
+  # NGINX
+  # ==================================================
+
+  nginx:
+    image: nginx:alpine
+    container_name: microservices-nginx
+    ports:
+      - "81:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - auth-service
+      - user-service
+      - project-service
+      - task-service
+      - notification-service
+    networks:
+      - microservices-network
+    restart: unless-stopped
+
+
+# ==================================================
+# NETWORK
+# ==================================================
+
+networks:
+  microservices-network:
+    driver: bridge
+
+
+# ==================================================
+# VOLUMES
+# ==================================================
+
+volumes:
+  auth-postgres-data:
+  user-postgres-data:
+  project-postgres-data:
+  task-postgres-data:
+  notification-postgres-data:
+  redis-data:
