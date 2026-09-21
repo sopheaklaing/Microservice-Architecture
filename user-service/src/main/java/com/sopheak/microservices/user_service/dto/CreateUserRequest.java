@@ -1,26 +1,18 @@
 package com.sopheak.microservices.user_service.dto;
 
-public class UserResponse {
+public class CreateUserRequest {
 
-    private Long id;
     private String name;
     private String email;
+    private String role;
 
-    public UserResponse() {
+    public CreateUserRequest() {
     }
 
-    public UserResponse(Long id, String name, String email) {
-        this.id = id;
+    public CreateUserRequest(String name, String email, String role) {
         this.name = name;
         this.email = email;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+        this.role = role;
     }
 
     public String getName() {
@@ -37,5 +29,13 @@ public class UserResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

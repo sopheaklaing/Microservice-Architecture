@@ -2,13 +2,14 @@ package com.sopheak.microservices.auth_service.entity;
 
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "auth_users")
 public class AuthUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -23,12 +24,13 @@ public class AuthUser {
     }
 
     public AuthUser(String email, String passwordHash, String role) {
+        this.id = UUID.randomUUID();
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

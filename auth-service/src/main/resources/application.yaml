@@ -25,3 +25,6 @@ jwt:
 logging:
   level:
     org.springframework.security: TRACE
+
+user-service:
+  url: http://user-service:8081

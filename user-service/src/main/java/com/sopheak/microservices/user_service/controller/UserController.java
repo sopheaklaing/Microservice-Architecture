@@ -1,14 +1,13 @@
 package com.sopheak.microservices.user_service.controller;
 
-import com.sopheak.microservices.user_service.dto.UserRequest;
-import com.sopheak.microservices.user_service.dto.UserResponse;
+import com.sopheak.microservices.user_service.entity.User;
 import com.sopheak.microservices.user_service.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -19,36 +18,37 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    // this is create User
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse createUser(
-            @Valid @RequestBody UserRequest request
-    ) {
-        return userService.createUser(request);
-    }
-    // this is get all User 
-    @GetMapping
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
-    }
-    // this is API for get user by ID
-    @GetMapping("/{id}")
-    public UserResponse getUserById(@PathVariable Long id) {
-    return userService.getUserById(id);
-    }
-    // route for update 
-    @PutMapping("/{id}")
-    public UserResponse updateUser(
-        @PathVariable Long id,
-        @Valid @RequestBody UserRequest request
-    ) {
-    return userService.updateUser(id, request);
-   }
 
-   @DeleteMapping("/{id}")
-   @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable Long id) {
-    userService.deleteUser(id);
-   }
+    @PostMapping
+    public ResponseEntity<User> createUser(@RequestBody User user) {
+
+        User createdUser = userService.createUser(user);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(createdUser);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(
+            @PathVariable UUID id
+    ) {
+        return ResponseEntity.ok(
+                userService.getUserById(id)
+        );
+    }
+
+    @GetMapping("/email")
+    public ResponseEntity<User> getUserByEmail(
+            @RequestParam String email
+    ) {
+        return ResponseEntity.ok(
+                userService.getUserByEmail(email)
+        );
+    }
 }
